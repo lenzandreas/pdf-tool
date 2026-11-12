@@ -6,7 +6,7 @@ import { singlePdf, type LoadedPdf } from '../ui/single.ts';
 import { whenVisible } from '../ui/thumbs.ts';
 import { renderPage } from '../lib/pdfjs.ts';
 import { EncryptedPdfError, loadPdf } from '../lib/pdfdoc.ts';
-import { PRESETS, findTextBoxes, redactPdf, termToRegex, type Box, type Preset } from '../lib/redact.ts';
+import { PRESETS, findTextBoxes, redactPdf, termToRegex, type Box, type BoxColor, type Preset } from '../lib/redact.ts';
 import type { Tool } from './types.ts';
 
 const MIN_SIZE = 0.004;
@@ -43,9 +43,11 @@ export const redactTool: Tool = {
         }
         counter.textContent = t('redactBoxes', { n, p });
       };
+      // Colour used for new boxes; each box keeps the colour it was made with.
+      let color: BoxColor = 'black';
       const addBox = (page: number, box: Box) => {
         const list = boxes.get(page) ?? [];
-        list.push(box);
+        list.push({ ...box, color });
         boxes.set(page, list);
       };
 
@@ -91,6 +93,28 @@ export const redactTool: Tool = {
         boxes.clear();
         changed();
       });
+      const colorSwitch = h('div', { class: 'color-switch', role: 'group', 'aria-label': t('redactColor') });
+      const renderColorSwitch = () =>
+        colorSwitch.replaceChildren(
+          h('span', { class: 'muted' }, t('redactColor')),
+          ...(['black', 'white'] as const).map((c) =>
+            h(
+              'button',
+              {
+                type: 'button',
+                class: `swatch-btn${c === color ? ' active' : ''}`,
+                'aria-pressed': String(c === color),
+                onclick: () => {
+                  color = c;
+                  renderColorSwitch();
+                },
+              },
+              h('span', { class: `swatch ${c}`, 'aria-hidden': 'true' }),
+              t(c === 'black' ? 'colorBlack' : 'colorWhite'),
+            ),
+          ),
+        );
+      renderColorSwitch();
       const drawToggle = checkbox('✎ ' + t('redactDraw'));
       const pagesEl = h('div', { class: 'redact-pages' });
       drawToggle.input.addEventListener('change', () => pagesEl.classList.toggle('drawing', drawToggle.input.checked));
@@ -143,7 +167,7 @@ export const redactTool: Tool = {
         const drawOverlay = () => {
           overlay.replaceChildren(
             ...(boxes.get(index) ?? []).map((b, k) => {
-              const el = h('div', { class: 'rbox', title: t('remove') });
+              const el = h('div', { class: `rbox${b.color === 'white' ? ' white' : ''}`, title: t('remove') });
               place(el, b);
               el.addEventListener('pointerdown', (e) => e.stopPropagation());
               el.addEventListener('click', () => {
@@ -167,7 +191,7 @@ export const redactTool: Tool = {
             y: Math.min(1, Math.max(0, (ev.clientY - rect.top) / rect.height)),
           });
           const start = pos(e);
-          const draft = h('div', { class: 'rbox draft' });
+          const draft = h('div', { class: `rbox draft${color === 'white' ? ' white' : ''}` });
           overlay.append(draft);
           let box: Box = { x: start.x, y: start.y, w: 0, h: 0 };
           const move = (ev: PointerEvent) => {
@@ -240,7 +264,7 @@ export const redactTool: Tool = {
       body.replaceChildren(
         searchForm,
         options,
-        h('div', { class: 'toolbar' }, clearAll, h('span', { class: 'touch-only' }, drawToggle.el)),
+        h('div', { class: 'toolbar' }, colorSwitch, clearAll, h('span', { class: 'touch-only' }, drawToggle.el)),
         pagesEl,
         bar,
         status.el,

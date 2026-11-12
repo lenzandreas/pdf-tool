@@ -68,6 +68,17 @@ function pdfText(bytes: Uint8Array, pageNo: number): string {
   return execFileSync('pdftotext', ['-f', String(pageNo), '-l', String(pageNo), file, '-'], { encoding: 'utf8' });
 }
 
+/** Grey value (0-255) of a page pixel, position given as fractions of the page. */
+function grayAt(bytes: Uint8Array, pageNo: number, fx: number, fy: number): number {
+  const file = join(dir, `px-${Date.now()}.pdf`);
+  writeFileSync(file, bytes);
+  const pgm = execFileSync('pdftoppm', ['-r', '50', '-gray', '-f', String(pageNo), '-l', String(pageNo), file]);
+  // Binary PGM: "P5\n<w> <h>\n255\n" followed by one byte per pixel.
+  const header = /^P5\s+(\d+)\s+(\d+)\s+255\s/.exec(pgm.subarray(0, 50).toString('latin1'))!;
+  const [w, h] = [Number(header[1]), Number(header[2])];
+  return pgm[header[0].length + Math.floor(fy * h) * w + Math.floor(fx * w)];
+}
+
 test('blackening removes the covered content for good', async () => {
   const page = await open('redact');
   await upload(page, [{ name: 'sample.pdf', data: sample }]);
@@ -78,7 +89,8 @@ test('blackening removes the covered content for good', async () => {
   await page.getByRole('button', { name: 'Mark matches' }).click();
   await page.getByText('1 areas marked').waitFor();
 
-  // Also draw a box by hand on page 1 over the e-mail line.
+  // Also draw a white box by hand on page 1 over the e-mail line.
+  await page.getByRole('button', { name: 'White' }).click();
   const stage = page.locator('.page-stage').first();
   await stage.evaluate((el) => el.scrollIntoView({ block: 'start' }));
   await page.waitForTimeout(300);
@@ -102,6 +114,9 @@ test('blackening removes the covered content for good', async () => {
   }
   assert.equal(containsSecret(out, 'max@example.com'), false, 'hand drawn box');
   assert.equal(pdfText(out, 1).trim(), '', 'page 1 has no text layer any more');
+  // The search box is black and the hand drawn box is white.
+  assert.equal(grayAt(out, 1, 0.12, 0.158), 0, 'black box');
+  assert.equal(grayAt(out, 1, 0.28, 0.225), 255, 'white box');
   assert.match(pdfText(out, 2), /PAGE TWO STAYS/, 'untouched pages stay searchable');
   assert.match(pdfText(out, 4), /ROTATED PAGE/);
   assert.equal(doc.getPage(3).getRotation().angle, 90);

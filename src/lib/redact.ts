@@ -11,7 +11,11 @@ export interface Box {
   y: number;
   w: number;
   h: number;
+  /** Fill colour; black unless set. Either way the content underneath is removed. */
+  color?: BoxColor;
 }
+
+export type BoxColor = 'black' | 'white';
 
 export interface RedactOptions {
   /** Resolution of the flattened pages. */
@@ -26,7 +30,7 @@ export interface RedactOptions {
 
 /**
  * Produces a new PDF in which every page that has at least one box is
- * replaced by a picture of that page with the boxes painted black.
+ * replaced by a picture of that page with the boxes painted black (or white).
  *
  * Why this cannot be undone: the flattened page holds nothing but pixels.
  * The text, fonts, vector graphics, images and annotations of the
@@ -82,8 +86,8 @@ async function addFlattenedPage(out: PDFDocument, page: PDFPageProxy, pageBoxes:
   const size = page.getViewport({ scale: 1 });
   const canvas = await renderPage(page, opts.dpi / 72);
   const ctx = canvas.getContext('2d')!;
-  ctx.fillStyle = '#000';
   for (const b of pageBoxes) {
+    ctx.fillStyle = b.color === 'white' ? '#fff' : '#000';
     // Round outwards to whole pixels so no partly covered pixel survives.
     const x0 = Math.floor(clamp01(b.x) * canvas.width);
     const y0 = Math.floor(clamp01(b.y) * canvas.height);

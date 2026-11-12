@@ -212,3 +212,18 @@ button.thumb { cursor: pointer; }
   h1 { font-size: 1.35rem; }
   main { padding-top: 1rem; }
 }
+
+/* box colour choice */
+.color-switch { display: inline-flex; align-items: center; gap: 0.35rem; margin-right: 0.5rem; }
+.swatch-btn {
+  display: inline-flex; align-items: center; gap: 0.4rem; font: inherit; font-size: 0.9rem; cursor: pointer;
+  padding: 0.35rem 0.7rem; border-radius: 8px; border: 1px solid var(--border); background: var(--surface); color: var(--text);
+}
+.swatch-btn.active { border-color: var(--accent); background: var(--accent-soft); font-weight: 600; }
+.swatch { width: 0.95rem; height: 0.95rem; border-radius: 3px; border: 1px solid #888; }
+.swatch.black { background: #000; }
+.swatch.white { background: #fff; }
+.rbox.white { background: #fff; outline: 1px dashed #777; }
+.rbox.white:hover:not(.draft) { background: rgb(255 255 255 / 85%); }
+.rbox.white:hover:not(.draft)::after { color: var(--danger); }
+.rbox.draft.white { background: rgb(255 255 255 / 70%); }

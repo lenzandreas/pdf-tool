@@ -14,7 +14,7 @@ auf Deutsch und Englisch.*
 | --- | --- |
 | Merge | Combine several PDFs, optionally only some pages of each. |
 | Split | Every page as its own file, every *n* pages, custom parts (`1-3, 4-6, 7-`) or extract selected pages. Several parts come as one ZIP. |
-| Blacken | Draw black boxes, or let it find text, e-mail addresses, IBANs and phone numbers. The covered content is removed for good (see below). |
+| Blacken | Draw black or white boxes, or let it find text, e-mail addresses, IBANs and phone numbers. The covered content is removed for good (see below). |
 | Organize pages | Reorder (drag and drop), rotate, duplicate and delete pages, also across several files. |
 | Images to PDF | JPG, PNG, WebP … into one PDF (A4, US Letter or image size). Phone photos are turned upright. |
 | PDF to images | Every page as PNG or JPG at 72, 150 or 300 dpi. |
