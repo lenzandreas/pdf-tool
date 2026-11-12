@@ -1,0 +1,26 @@
+{
+  "name": "pdf-tool",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Edit PDFs entirely in your browser: merge, split, blacken and more. No uploads.",
+  "type": "module",
+  "scripts": {
+    "predev": "node scripts/copy-pdfjs-assets.mjs",
+    "dev": "vite",
+    "prebuild": "node scripts/copy-pdfjs-assets.mjs",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "test": "node --test 'tests/unit/*.test.ts'",
+    "test:e2e": "npm run build && node --test --test-concurrency=1 'tests/e2e/*.test.ts'"
+  },
+  "dependencies": {
+    "fflate": "0.8.3",
+    "pdf-lib": "1.17.1",
+    "pdfjs-dist": "5.4.624"
+  },
+  "devDependencies": {
+    "playwright": "1.63.0",
+    "typescript": "5.9.3",
+    "vite": "7.3.7"
+  }
+}

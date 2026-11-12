@@ -1,0 +1,35 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm test
+      - name: Install Chromium and pdftotext for the browser tests
+        run: |
+          npx playwright install --with-deps chromium
+          sudo apt-get install -y poppler-utils
+      - run: npm run test:e2e
+      # The ready-to-upload website. Download it from the run's summary page
+      # and copy its contents to your web space.
+      - uses: actions/upload-artifact@v4
+        with:
+          name: pdf-tool-website
+          path: dist/
+          include-hidden-files: true
+          retention-days: 30

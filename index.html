@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <!--
+      The policy below lets the page talk only to its own server, so even a
+      bug could not send a PDF anywhere else. Files are read and written
+      with blob: URLs inside the browser.
+    -->
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; worker-src 'self' blob:; connect-src 'self' blob: data:; img-src 'self' blob: data:; style-src 'self' 'unsafe-inline'; font-src 'self' data:; object-src 'none'; base-uri 'self'; form-action 'none'"
+    />
+    <meta name="referrer" content="no-referrer" />
+    <meta name="description" content="Edit PDFs in your browser: merge, split, blacken and more. Nothing is uploaded." />
+    <meta name="theme-color" content="#1f3a5f" />
+    <link rel="icon" href="./favicon.svg" type="image/svg+xml" />
+    <title>PDF-Tool</title>
+  </head>
+  <body>
+    <div id="app"></div>
+    <noscript>This tool needs JavaScript. Diese Anwendung benötigt JavaScript.</noscript>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
